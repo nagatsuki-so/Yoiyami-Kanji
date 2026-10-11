@@ -65,7 +65,7 @@ const SoundEngine = (() => {
     bgmNodes = { osc1, osc2, lfo, bgmGain, bgmDuck };
   }
 
-  // BGMの一時停止/再開（陰陽師の霊の「無音」区間用）。停止は即座、再開はゆっくり戻す
+  // BGMの一時停止/再開（罰演出の間に止める）。停止は即座、再開はゆっくり戻す
   function setBgmSilenced(silent){
     if(!ctx || !bgmNodes) return;
     const now = ctx.currentTime;
@@ -178,42 +178,8 @@ const SoundEngine = (() => {
     return shaper;
   }
 
-  // 呪：文字が1つ現れるごとの「ドッ」という重い打撃音。strength(0〜1)が大きいほど重く長い
-  function playImpactSfx(strength){
-    if(!ready()) return;
-    const now = ctx.currentTime;
-    const s = Math.max(0.1, Math.min(1, strength));
-    const bus = ctx.createGain();
-    bus.gain.value = 0.5 + s*0.5;
-    const shaper = distortion(8);
-    bus.connect(shaper); shaper.connect(masterGain);
-
-    // 胴鳴り：ピッチが一気に落ちる低音
-    const o = ctx.createOscillator();
-    o.type = "sine";
-    o.frequency.setValueAtTime(150, now);
-    o.frequency.exponentialRampToValueAtTime(40, now + 0.12);
-    const og = ctx.createGain();
-    og.gain.setValueAtTime(0.0001, now);
-    og.gain.exponentialRampToValueAtTime(0.6, now + 0.005);
-    og.gain.exponentialRampToValueAtTime(0.0001, now + 0.2 + s*0.3);
-    o.connect(og); og.connect(bus);
-    o.start(now); o.stop(now + 0.55);
-
-    // 打ち付けた瞬間の衝撃：短く低いノイズ
-    const n = noiseSource();
-    const lp = ctx.createBiquadFilter();
-    lp.type = "lowpass";
-    lp.frequency.value = 1400;
-    const ng = ctx.createGain();
-    ng.gain.setValueAtTime(0.4, now);
-    ng.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
-    n.connect(lp); lp.connect(ng); ng.connect(bus);
-    n.start(now, Math.random()); n.stop(now + 0.1);
-  }
-
   // 重低音の衝撃音。"don"＝「ドン」、"zun"＝「ズン」（より低く長く響く）
-  // ※現在はどの演出からも使っていない（再び使う可能性があるため残している）
+  // 一つ目（ズン）・陰陽師の霊（ドン）で、動画の音声が出せなかった時の代わりに使う
   function playBoomSfx(kind){
     if(!ready()) return;
     const now = ctx.currentTime;
@@ -264,7 +230,7 @@ const SoundEngine = (() => {
     n.start(now); n.stop(now + dur + 0.05);
   }
 
-  // 白い女：耳に刺さる金切り声。
+  // 白い女：耳に刺さる金切り声（動画の音声が出せなかった時の代わりに使う）。
   // 高い声を数本重ね、ノイズでピッチを不規則に揺らして（声帯のザラつき）、歪ませる。規則的なビブラートは使わない
   function playShriekSfx(){
     if(!ready()) return;
@@ -326,7 +292,8 @@ const SoundEngine = (() => {
     breath.start(now); breath.stop(now + dur);
   }
 
-  // 白い女：囁き声のようなノイズがだんだん大きくなる（最後は急に途切れる）
+  // 囁き声のようなノイズがだんだん大きくなる（最後は急に途切れる）
+  // ※以前の白い女で使っていた。現在はどの演出からも使っていない（再び使う可能性があるため残している）
   function playWhisperSfx(dur){
     if(!ready()) return;
     const now = ctx.currentTime;
@@ -352,216 +319,6 @@ const SoundEngine = (() => {
       n.connect(bp); bp.connect(g); g.connect(out);
       n.start(now + i*0.05); n.stop(now + dur + 0.05);
     });
-  }
-
-  // 赤い目：無数の目が並ぶ間ずっと鳴り続ける不穏な音。stop()でぷつっと途切れる。
-  // 低いうなりを音程をわずかにずらして2本重ねて濁らせ、高い音の不協和なうなりと隙間風のノイズを重ね、
-  // 音量をゆっくり揺らして息をしているように聞かせる
-  function playDread(){
-    if(!ready()) return { stop(){} };
-    const now = ctx.currentTime;
-    const out = ctx.createGain();
-    out.gain.setValueAtTime(0.0001, now);
-    out.gain.exponentialRampToValueAtTime(0.9, now + 0.3);
-    out.connect(masterGain);
-
-    // 呼吸するような音量の揺れ
-    const breathe = ctx.createOscillator();
-    breathe.frequency.value = 0.35;
-    const breatheGain = ctx.createGain();
-    breatheGain.gain.value = 0.25;
-    breathe.connect(breatheGain); breatheGain.connect(out.gain);
-
-    const sources = [breathe];
-    // 低いうなり（濁り）
-    const lowLp = ctx.createBiquadFilter();
-    lowLp.type = "lowpass";
-    lowLp.frequency.value = 260;
-    lowLp.connect(out);
-    [55, 58.3].forEach(f => {
-      const o = ctx.createOscillator();
-      o.type = "sawtooth";
-      o.frequency.value = f;
-      const g = ctx.createGain();
-      g.gain.value = 0.35;
-      o.connect(g); g.connect(lowLp);
-      sources.push(o);
-    });
-    // 高い音の不協和なうなり（半音ぶつかる2音）
-    [1760, 1864].forEach(f => {
-      const o = ctx.createOscillator();
-      o.type = "sine";
-      o.frequency.value = f;
-      const g = ctx.createGain();
-      g.gain.value = 0.025;
-      o.connect(g); g.connect(out);
-      sources.push(o);
-    });
-    // 隙間風のようなノイズ
-    const wind = noiseSource();
-    const windBp = ctx.createBiquadFilter();
-    windBp.type = "bandpass";
-    windBp.frequency.value = 700;
-    windBp.Q.value = 0.7;
-    const windGain = ctx.createGain();
-    windGain.gain.value = 0.12;
-    wind.connect(windBp); windBp.connect(windGain); windGain.connect(out);
-    sources.push(wind);
-
-    sources.forEach(s => s.start(now));
-    return {
-      stop(){
-        const t = ctx.currentTime;
-        out.gain.cancelScheduledValues(t);
-        out.gain.setValueAtTime(0, t);
-        sources.forEach(s => { try{ s.stop(); }catch(e){} });
-      }
-    };
-  }
-
-  // 陰陽師の霊：何かが床を這い寄ってくる「ズリ…ズリ…」という音。
-  // 不規則な間隔で引きずる音を刻み、後半ほど間隔が詰まって大きくなる（クレッシェンド）。dur秒で急に途切れる
-  function playCrawl(dur){
-    if(!ready()) return { stop(){} };
-    const now = ctx.currentTime;
-    const out = ctx.createGain();
-    out.gain.setValueAtTime(0.05, now);
-    out.gain.exponentialRampToValueAtTime(1.2, now + dur);
-    out.gain.setValueAtTime(0, now + dur);
-    out.connect(masterGain);
-
-    // 引きずる1回ごとの「ズリッ」
-    const n = noiseSource();
-    const bp = ctx.createBiquadFilter();
-    bp.type = "bandpass";
-    bp.Q.value = 1.1;
-    const lp = ctx.createBiquadFilter();
-    lp.type = "lowpass";
-    lp.frequency.value = 1600;
-    const g = ctx.createGain();
-    g.gain.value = 0;
-    n.connect(bp); bp.connect(lp); lp.connect(g); g.connect(out);
-    for(let t = 0; t < dur; ){
-      const p = t / dur;
-      const len = 0.2 + Math.random()*0.18 - p*0.06;
-      const peak = 0.35 + Math.random()*0.25;
-      bp.frequency.setValueAtTime(380 + Math.random()*320, now + t);
-      g.gain.setValueAtTime(0.0001, now + t);
-      g.gain.linearRampToValueAtTime(peak, now + t + len*0.3);
-      // 引きずっている最中のざらつき：細かく音量を揺らす
-      for(let k = 0.3; k < 1; k += 0.08){
-        g.gain.setValueAtTime(peak * (0.5 + Math.random()*0.5), now + t + len*k);
-      }
-      g.gain.linearRampToValueAtTime(0.0001, now + t + len);
-      t += len + (0.35 - p*0.28) * (0.6 + Math.random()*0.8);
-    }
-    n.start(now); n.stop(now + dur + 0.05);
-
-    // 床をこする低いうなり（途切れずに鳴り続ける）
-    const rumble = noiseSource();
-    const rlp = ctx.createBiquadFilter();
-    rlp.type = "lowpass";
-    rlp.frequency.value = 140;
-    const rg = ctx.createGain();
-    rg.gain.value = 0.35;
-    rumble.connect(rlp); rlp.connect(rg); rg.connect(out);
-    rumble.start(now, Math.random()); rumble.stop(now + dur + 0.05);
-
-    return {
-      stop(){
-        const t = ctx.currentTime;
-        out.gain.cancelScheduledValues(t);
-        out.gain.setValueAtTime(0, t);
-        try{ n.stop(); rumble.stop(); }catch(e){}
-      }
-    };
-  }
-
-  // 陰陽師の霊：聞き取れない祝詞。
-  // 人の声の響き（母音ごとの共鳴＝フォルマント）を持たせた低い声を3声重ね、母音を不規則に変えて唱えさせる。
-  // 反響（エコー）は付けない。笛のように聞こえないよう共鳴は緩めにし、声の胴鳴りと息の音で人の声に近づけている。
-  // distortAt秒からこもって音程が崩れていき、duration秒で急に途切れる
-  function playChant(duration, distortAt){
-    if(!ready()) return { stop(){} };
-    const now = ctx.currentTime;
-    const end = now + duration;
-
-    const out = ctx.createGain();
-    out.gain.setValueAtTime(0.0001, now);
-    out.gain.exponentialRampToValueAtTime(1.0, now + 0.8);
-    out.gain.setValueAtTime(1.0, end - 0.01);
-    out.gain.setValueAtTime(0, end);
-    out.connect(masterGain);
-
-    const lp = ctx.createBiquadFilter();
-    lp.type = "lowpass";
-    lp.frequency.setValueAtTime(3000, now);
-    lp.frequency.setValueAtTime(3000, now + distortAt);
-    lp.frequency.exponentialRampToValueAtTime(350, end);
-    lp.connect(out);
-
-    const FORMANTS = { a:[730, 1090], i:[270, 2290], u:[300, 870], e:[530, 1840], o:[570, 840] };
-    const vowels = Object.keys(FORMANTS);
-    const sources = [];
-    // [基本周波数, 唱え始めのずれ]
-    [[92, 0], [92*1.008, 0.11], [61.5, 0.05]].forEach(([f0, offset], vi) => {
-      const src = ctx.createOscillator();
-      src.type = "sawtooth";
-      src.frequency.setValueAtTime(f0, now);
-      src.detune.setValueAtTime(0, now + distortAt);
-      src.detune.linearRampToValueAtTime(-500 - vi*150, end);
-      const f1 = ctx.createBiquadFilter();
-      f1.type = "bandpass";
-      f1.Q.value = 5;
-      const f2 = ctx.createBiquadFilter();
-      f2.type = "bandpass";
-      f2.Q.value = 7;
-      // 声の胴鳴り（低い帯域をそのまま少し混ぜる）
-      const bodyLp = ctx.createBiquadFilter();
-      bodyLp.type = "lowpass";
-      bodyLp.frequency.value = 600;
-      const bodyGain = ctx.createGain();
-      bodyGain.gain.value = 0.35;
-      // 息の音
-      const breath = noiseSource();
-      const breathBp = ctx.createBiquadFilter();
-      breathBp.type = "bandpass";
-      breathBp.frequency.value = 1200;
-      breathBp.Q.value = 0.8;
-      const breathGain = ctx.createGain();
-      breathGain.gain.value = 0.06;
-      const env = ctx.createGain();
-      env.gain.value = 0;
-      src.connect(f1); src.connect(f2); src.connect(bodyLp);
-      bodyLp.connect(bodyGain);
-      breath.connect(breathBp); breathBp.connect(breathGain);
-      f1.connect(env); f2.connect(env); bodyGain.connect(env); breathGain.connect(env);
-      env.connect(lp);
-
-      for(let t = now + offset; t < end; ){
-        const len = 0.16 + Math.random()*0.22;
-        const [a, b] = FORMANTS[vowels[Math.floor(Math.random()*vowels.length)]];
-        f1.frequency.setTargetAtTime(a, t, 0.03);
-        f2.frequency.setTargetAtTime(b, t, 0.03);
-        env.gain.setTargetAtTime(0.8 + Math.random()*0.4, t, 0.02);
-        env.gain.setTargetAtTime(0.2, t + len*0.7, 0.04);
-        // 句の切れ目で音程を少し落とし、唱えている抑揚を出す
-        src.frequency.setTargetAtTime(Math.random() < 0.12 ? f0*0.89 : f0, t, 0.05);
-        t += len;
-      }
-      src.start(now); src.stop(end + 0.05);
-      breath.start(now, Math.random()); breath.stop(end + 0.05);
-      sources.push(src, breath);
-    });
-
-    return {
-      stop(){
-        const t = ctx.currentTime;
-        out.gain.cancelScheduledValues(t);
-        out.gain.setValueAtTime(0, t);
-        sources.forEach(s => { try{ s.stop(); }catch(e){} });
-      }
-    };
   }
 
   // 時間内に正解：柏手（二拍）と澄んだ鈴
@@ -670,8 +427,8 @@ const SoundEngine = (() => {
 
   return {
     unlock, playCorrectSfx, playWrongSfx, playTapSfx, toggleMute,
-    setBgmSilenced, playOmenSfx, playHeartbeatSfx, playImpactSfx, playBoomSfx,
-    playShriekSfx, playWhisperSfx, playDread, playCrawl, playChant, playPurifySfx,
+    setBgmSilenced, playOmenSfx, playHeartbeatSfx, playBoomSfx,
+    playShriekSfx, playWhisperSfx, playPurifySfx,
     get muted(){ return muted; },
     get isUnlocked(){ return !!bgmNodes; }
   };

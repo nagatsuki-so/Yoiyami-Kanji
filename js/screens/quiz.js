@@ -31,9 +31,13 @@ function currentQuestion(){
 
 // 怪異演出の制限時間（秒）
 const KAII_TIME_LIMIT = { choice: 7, free: 10 };
+// 最初のこの問題数までは、怪異演出の対象の問題でも怪異を起こさない（確認用URLの時は1問目から起こす）
+const KAII_SAFE_QUESTIONS = 3;
 
 function isKaiiQuestion(q){
-  return state.kaiiEvent && (!!q.kaiiEvent || !!KAII_DEBUG);
+  if(!state.kaiiEvent) return false;
+  if(KAII_DEBUG) return true;
+  return !!q.kaiiEvent && state.current >= KAII_SAFE_QUESTIONS;
 }
 
 // 問題を出す。怪異演出の対象なら、予兆（段階1）を挟んでから表示し、制限時間（段階2）を開始する
@@ -130,8 +134,8 @@ function handleChoiceAnswer(choiceText, btnEl){
   finishAnswer(isRight);
 }
 
+// 回答は「判定」ボタンでのみ受け付ける（Enterキー・スマホの改行ボタンでは回答しない。変換確定のEnterで誤って送らないため）
 el.btnSubmit.addEventListener("click", submitFreeAnswer);
-el.freeInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter") submitFreeAnswer(); });
 
 function submitFreeAnswer(){
   if(state.locked) return;
@@ -172,6 +176,14 @@ function setFeedbackStyle(kind){
   el.feedbackOverlay.classList.toggle("kaii-cursed", kind === "cursed");
 }
 
+// 結果シートを表示する。シート自体にフォーカスを当てて Tab キーの起点にし、
+// 直前の操作に関係なく、Tab 1回で「次の漢字へ」「結果確認へ」に移れるようにする
+const feedbackSheet = document.getElementById("feedback-sheet");
+function showFeedback(){
+  el.feedbackOverlay.classList.add("show");
+  feedbackSheet.focus({ preventScroll: true });
+}
+
 function finishAnswer(isRight, timedOut = false){
   const q = currentQuestion();
   const isKaii = Kaii.isPressuring();
@@ -190,7 +202,7 @@ function finishAnswer(isRight, timedOut = false){
     if(isRight) SoundEngine.playCorrectSfx(); else SoundEngine.playWrongSfx();
     setFeedbackStyle(null);
     el.fbResult.textContent = isRight ? "正解" : "不正解";
-    el.feedbackOverlay.classList.add("show");
+    showFeedback();
     return;
   }
 
@@ -201,8 +213,8 @@ function finishAnswer(isRight, timedOut = false){
     Kaii.purify();
     setFeedbackStyle("purified");
     el.fbResult.textContent = "祓い清めた";
-    el.fbKaiiNote.textContent = `正解 ― 残り${toKyuNumeral(Math.ceil(remainMs / 1000))}秒で退けた`;
-    el.feedbackOverlay.classList.add("show");
+    el.fbKaiiNote.textContent = `正解 ― 残り${toKyuNumeral(Math.ceil(remainMs / 1000))}秒`;
+    showFeedback();
   } else {
     // 誤答・時間切れ：段階3（罰演出）のあと専用シートへ
     el.freeInput.blur();
@@ -210,7 +222,7 @@ function finishAnswer(isRight, timedOut = false){
       setFeedbackStyle("cursed");
       el.fbResult.textContent = timedOut ? "時間切れ――憑かれた" : "憑かれた";
       el.fbKaiiNote.textContent = timedOut ? "制限時間内に祓えなかった" : "不正解 ― 読みを誤り、怪異に魅入られた";
-      el.feedbackOverlay.classList.add("show");
+      showFeedback();
     });
   }
 }

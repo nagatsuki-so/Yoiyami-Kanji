@@ -2,7 +2,7 @@
      怪異演出（怪異乱入「あり」かつ怪異演出フラグ付きの問題でのみ発生）
      段階1：予兆 .kaii-omen
      段階2：継続 .kaii-bg + .kaii-ambient + .kaii-timer（#app.kaii-active の間）
-     段階3：罰   .kaii-punish（data-variant で eye / face / curse / onmyoji を切替）
+     段階3：罰   .kaii-punish（data-variant で eye / face / onmyoji を切替）
      ※光過敏性への配慮として、明滅・コマ飛びはいずれも1秒に3回以下に抑えている
      ※このファイルは css/ フォルダにあるため、素材の参照は ../assets/ から始める
      ============================================================ */
@@ -11,7 +11,6 @@
     --kaii-ink:#2a1c14;
     --kaii-shu:#b3261e;
   }
-  .kaii-defs{ position:absolute; width:0; height:0; overflow:hidden; }
 
   /* 実写の砂嵐（assets/kaii/static.mp4）。黒い部分を透かして重ねる */
   .kaii-static{
@@ -19,18 +18,6 @@
     width:100%; height:100%; object-fit:cover;
     mix-blend-mode:screen; opacity:.35;
     pointer-events:none;
-  }
-  @keyframes kaiiShake{
-    0%,100%{ transform:translate(0,0); }
-    10%{ transform:translate(-10px,6px); }
-    20%{ transform:translate(9px,-8px); }
-    30%{ transform:translate(-7px,-4px); }
-    40%{ transform:translate(8px,7px); }
-    50%{ transform:translate(-5px,3px); }
-    60%{ transform:translate(6px,-6px); }
-    70%{ transform:translate(-4px,5px); }
-    80%{ transform:translate(3px,-2px); }
-    90%{ transform:translate(-2px,1px); }
   }
 
   /* ---------- 段階2：継続演出 ---------- */
@@ -205,189 +192,36 @@
   }
   .kaii-punish[data-variant="eye"] .kp-eye,
   .kaii-punish[data-variant="face"] .kp-face,
-  .kaii-punish[data-variant="curse"] .kp-curse,
   .kaii-punish[data-variant="onmyoji"] .kp-onmyoji{ display:flex; }
-  .kaii-punish.shake .kp-scene{ animation:kaiiShake .5s linear 2; }
-  #app.kaii-warping .kaii-punish{ filter:url(#kaii-warp); }
 
-  /* ---------- 罰1：赤い目 ---------- */
+  /* ---------- 罰1：一つ目（Runwayで生成した動画を画面いっぱいに流す） ----------
+     白い女と同じく横長の動画を画面いっぱいに広げる。怪物も目も中央にある。
+     data-phase：video（動画）→ black（動画を隠して黒画面） */
   .kp-video{ display:block; }
   .kp-eye{ background:#000; }
-  .kp-eye-shake{
-    position:absolute; inset:0;
-    display:flex; align-items:center; justify-content:center;
-    animation:kaiiShake .5s linear .7s 2;
-  }
-  /* 赤く染めた実写の目（約3.5秒）。目の形の外側を闇に溶かし、目だけが浮いているように見せる。
-     目が見開く0.7秒前後に画面を揺らしている */
   .kp-eye-video{
-    width:min(150vw, 1100px); height:auto; aspect-ratio:16/9;
-    -webkit-mask-image:radial-gradient(ellipse 40% 36% at 55% 40%, #000 50%, transparent 100%);
-    mask-image:radial-gradient(ellipse 40% 36% at 55% 40%, #000 50%, transparent 100%);
-    opacity:0;
-    animation:kaiiEyeZoom 2.6s ease-out forwards;
-  }
-  @keyframes kaiiEyeZoom{
-    0%{ opacity:0; transform:scale(1); }
-    10%{ opacity:1; }
-    85%{ opacity:1; transform:scale(1.18); }
-    100%{ opacity:0; transform:scale(1.25); }
-  }
-  /* 動画のあと：目の画像を画面いっぱいのマス目に敷き詰める（動きなし）。
-     data-state：closed（閉じた目）／off（黒画面）／open（開いた目）。列数・段数（--cols・--rows）はJSで画面に合わせて決める */
-  .kp-eye-grid{
-    position:absolute; inset:0;
-    display:none;
-    grid-template-columns:repeat(var(--cols, 3), 1fr);
-    grid-template-rows:repeat(var(--rows, 10), 1fr);
-  }
-  .kp-eye[data-phase="grid"] .kp-eye-shake{ display:none; }
-  .kp-eye[data-phase="grid"] .kp-eye-grid{ display:grid; }
-  /* 1マス＝目1つ。動画と同じく目の形の外側を闇に溶かし、目だけが並んで見えるようにする */
-  .kp-eye-cell{
-    background-size:cover; background-position:55% 40%; background-repeat:no-repeat;
-    -webkit-mask-image:radial-gradient(ellipse 40% 36% at 55% 40%, #000 50%, transparent 100%);
-    mask-image:radial-gradient(ellipse 40% 36% at 55% 40%, #000 50%, transparent 100%);
-  }
-  /* 閉じた目はまつ毛の線が画像の下寄り（約60%）にあるため、闇に溶かす楕円の中心も下げる */
-  .kp-eye-grid[data-state="closed"] .kp-eye-cell{
-    background-image:url("../assets/kaii/eye_closed.jpg");
-    -webkit-mask-image:radial-gradient(ellipse 42% 32% at 50% 58%, #000 50%, transparent 100%);
-    mask-image:radial-gradient(ellipse 42% 32% at 50% 58%, #000 50%, transparent 100%);
-  }
-  .kp-eye-grid[data-state="open"] .kp-eye-cell{ background-image:url("../assets/kaii/eye_open.jpg"); }
-
-  /* ---------- 罰2：白い女（砂嵐越しに約4秒じっと見つめてくる） ---------- */
-  .kp-face{ background:#030303; }
-  .kp-face > .kaii-static{ opacity:.45; }
-  /* 画面いっぱいの顔。近寄る動きはせず、気づくか気づかないか程度にゆっくり寄るだけ */
-  .kp-face-wrap{
-    position:absolute; inset:0;
-    opacity:0;
-    animation:kaiiFaceStare 4.3s ease-in forwards;
-  }
-  @keyframes kaiiFaceStare{
-    0%{ opacity:0; transform:scale(1); }
-    15%{ opacity:1; }
-    100%{ opacity:1; transform:scale(1.08); }
-  }
-  /* 実写の顔（正方形の素材を画面いっぱいに）。周囲を闇に溶かす */
-  .kp-face-video{
-    width:100%; height:100%; object-fit:cover; object-position:50% 40%;
-    -webkit-mask-image:radial-gradient(ellipse 60% 60% at 50% 45%, #000 55%, transparent 100%);
-    mask-image:radial-gradient(ellipse 60% 60% at 50% 45%, #000 55%, transparent 100%);
-  }
-
-  /* ---------- 罰3：呪 ----------
-     data-phase：dark（暗闇）→ write（赤い墨の「呪」が増える）→ red（真っ赤）→ message（文字）→ still（静止画） */
-  .kp-curse{ background:#000; }
-  .kp-curse > *{ display:none; }
-  .kp-curse[data-phase="write"] .kp-curse-layer,
-  .kp-curse[data-phase="message"] .kp-curse-message,
-  .kp-curse[data-phase="still"] .kp-curse-still{ display:block; }
-  .kp-curse[data-phase="red"],
-  .kp-curse[data-phase="message"]{ background:#c8000e; }
-
-  /* 真っ黒な紙に赤い墨汁で書いたように：縁取りなし、輪郭を筆のようにガタつかせる */
-  .kp-curse-layer{ position:absolute; inset:0; filter:url(#kaii-ink); }
-  .kp-curse-glyph{
-    position:absolute;
-    font-family:'Yuji Boku','Yuji Syuku',serif; line-height:1; white-space:nowrap;
-    transform:translate(-50%,-50%) rotate(var(--r));
-    opacity:0;
-    animation:kaiiInk .45s ease-out forwards;
-  }
-  /* その場にじわっと浮かび上がる。墨の濃さ（--ink）は1文字ずつ少し変える */
-  @keyframes kaiiInk{ to{ opacity:var(--ink); } }
-
-  .kp-curse-message{
-    font-family:'Yuji Boku','Yuji Syuku',serif;
-    font-size:clamp(22px, 6vw, 34px);
-    letter-spacing:.2em;
-    color:#000;
-  }
-  .kp-curse-still{
-    position:absolute; inset:0;
-    width:100%; height:100%; object-fit:cover; object-position:50% 40%;
-  }
-
-  /* ---------- 罰4：陰陽師の霊 ---------- */
-  .kp-onmyoji{ background:radial-gradient(ellipse 70% 60% at 50% 55%, #0b2038, #030914 60%, #000 100%); }
-  .kp-mist, .kp-frost{ position:absolute; inset:0; pointer-events:none; }
-  .kp-mist span{
-    position:absolute; width:90vw; height:40vh; border-radius:50%;
-    background:radial-gradient(ellipse at center, rgba(120,190,255,.22), transparent 70%);
-    filter:blur(18px);
-    animation:kaiiMist 7s ease-in-out infinite alternate;
-  }
-  .kp-mist span:nth-child(1){ left:-20vw; bottom:-8vh; }
-  .kp-mist span:nth-child(2){ right:-25vw; bottom:10vh; animation-duration:9s; animation-delay:-3s; }
-  .kp-mist span:nth-child(3){ left:5vw; top:-10vh; animation-duration:11s; opacity:.6; }
-  @keyframes kaiiMist{
-    from{ transform:translate(0,0) scale(1); }
-    to{ transform:translate(8vw,-6vh) scale(1.15); }
-  }
-  .kp-frost-p{
-    position:absolute; bottom:-10px;
-    width:3px; height:3px; border-radius:50%;
-    background:#cfeaff; box-shadow:0 0 8px 2px rgba(140,200,255,.8);
-    opacity:0;
-    animation:kaiiFrost linear infinite;
-  }
-  @keyframes kaiiFrost{
-    0%{ transform:translate(0,0); opacity:0; }
-    15%{ opacity:.9; }
-    100%{ transform:translate(var(--dx), -105vh); opacity:0; }
-  }
-  /* 青く染めた実写の煙を背景に敷く（黒い部分を透かす） */
-  .kp-smoke-video{
     position:absolute; inset:0;
     width:100%; height:100%; object-fit:cover;
-    mix-blend-mode:screen; opacity:.85;
   }
-  /* 安倍晴明の肖像（黒背景に青白い線）。要素ごと screen で重ねて黒い背景を消す */
-  .kp-ghost{
-    position:relative;
-    width:min(94vw, 60vh, 480px); aspect-ratio:1137/1506;
-    mix-blend-mode:screen;
-    opacity:0;
-    animation:kaiiGhostIn 1.2s ease-out forwards, kaiiGhostFloat 3.2s ease-in-out infinite;
+  .kp-eye[data-phase="black"] .kp-eye-video{ visibility:hidden; }
+
+  /* ---------- 罰2：白い女（Runwayで生成した動画を画面いっぱいに流す） ----------
+     横長の動画を画面いっぱいに広げる。スマホの縦画面では左右が切れるが、女のシルエットも顔も中央にある */
+  .kp-face{ background:#000; }
+  .kp-face-video{
+    position:absolute; inset:0;
+    width:100%; height:100%; object-fit:cover;
   }
-  .kp-ghost-img{ display:block; width:100%; height:100%; }
-  @keyframes kaiiGhostIn{ from{ opacity:0; } to{ opacity:.92; } }
-  @keyframes kaiiGhostFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-12px); } }
-  /* 閉じていた目に、祝詞の途中（1.6秒）から青白い光が灯る */
-  .kp-ghost-eye{
-    position:absolute; width:4.2%; height:1.2%;
-    border-radius:50%;
-    background:#f2fdff;
-    box-shadow:0 0 6px 2px rgba(200,240,255,.95), 0 0 18px 6px rgba(120,200,255,.7);
-    transform:translate(-50%,-50%);
-    opacity:0;
-    animation:kaiiGhostEyeOpen .5s ease-out 1.6s forwards, kaiiGhostEye 1.4s ease-in-out 2.1s infinite;
+
+  /* ---------- 罰3：陰陽師の霊（Runwayで生成した動画を画面いっぱいに流す） ----------
+     白い女と同じく横長の動画を画面いっぱいに広げる。陰陽師は中央に立っている。
+     data-phase：video（動画）→ black（動画を隠して黒画面） */
+  .kp-onmyoji{ background:#000; }
+  .kp-onmyoji-video{
+    position:absolute; inset:0;
+    width:100%; height:100%; object-fit:cover;
   }
-  @keyframes kaiiGhostEyeOpen{
-    from{ opacity:0; transform:translate(-50%,-50%) scaleY(.1); }
-    to{ opacity:1; transform:translate(-50%,-50%) scaleY(1); }
-  }
-  @keyframes kaiiGhostEye{ 0%,100%{ opacity:.7; } 50%{ opacity:1; } }
-  .kp-onmyoji[data-phase="warp"] .kp-ghost-eye{ animation-duration:.5s, .6s; }
-  /* 無音の闇 → 般若心経がびっしり並ぶ */
-  .kp-onmyoji[data-phase="void"],
-  .kp-onmyoji[data-phase="sutra"]{ background:#000; }
-  .kp-onmyoji[data-phase="void"] > :not(.kp-sutra),
-  .kp-onmyoji[data-phase="sutra"] > :not(.kp-sutra){ display:none; }
-  .kp-sutra{
-    position:absolute; inset:0; display:none;
-    writing-mode:vertical-rl;
-    font-family:'Yuji Syuku',serif;
-    font-size:clamp(16px, 2.6vh, 24px); line-height:1.2; letter-spacing:0;
-    color:rgba(233,226,211,.85);
-    text-shadow:0 0 6px rgba(0,0,0,.9);
-    word-break:break-all; line-break:anywhere;
-    overflow:hidden;
-  }
-  .kp-onmyoji[data-phase="sutra"] .kp-sutra{ display:block; }
+  .kp-onmyoji[data-phase="black"] .kp-onmyoji-video{ visibility:hidden; }
 
   /* ---------- 怪異乱入時の結果シート ---------- */
   .feedback-sheet{ position:relative; }
@@ -411,11 +245,11 @@
   .kaii-purified .fb-trivia{ background:rgba(90,60,30,.07); border-left-color:var(--kaii-shu); color:var(--kaii-ink); }
   .kaii-purified .fb-seal{
     display:flex; align-items:center; justify-content:center;
-    position:absolute; top:18px; right:20px;
+    position:absolute; top:35px; right:50px;
     width:56px; height:56px;
     border:2px solid var(--kaii-shu); border-radius:4px;
     color:var(--kaii-shu);
-    font-family:'Yuji Syuku',serif; font-size:32px;
+    font-family:'Yuji Syuku',serif; font-size:40px;
     transform:rotate(-8deg); opacity:.85;
     animation:kaiiSealStamp .4s cubic-bezier(.5,0,.8,.4) .25s both;
   }
@@ -459,17 +293,12 @@
 
   /* ---------- 視差効果を減らす設定：揺れ・歪み・コマ飛びを止め、フェード中心にする ---------- */
   @media (prefers-reduced-motion: reduce){
-    .ka-scan::after, .ka-vignette, .kp-mist span{ animation:none !important; }
-    .kaii-ambient > .ka-tear, .ko-slices, .kp-frost{ display:none; }
+    .ka-scan::after, .ka-vignette{ animation:none !important; }
+    .kaii-ambient > .ka-tear, .ko-slices{ display:none; }
     #app.kaii-active .kanji-main{ animation:none; text-shadow:-2px 0 rgba(255,30,50,.7), 2px 0 rgba(60,200,255,.5); }
     .kaii-timer.danger .kaii-timer-num{ animation:none; }
     .ko-text{ animation:kaiiFadeInRM 2.2s ease forwards; }
     .kaii-purify.run{ animation:none; }
-    .kaii-punish.shake .kp-scene, .kp-eye-shake{ animation:none; }
-    .kp-eye-video{ animation:kaiiFadeInRM 2.6s ease forwards; }
-    .kp-face-wrap{ animation:kaiiFadeInRM 4.3s ease forwards; }
-    .kp-ghost{ animation:kaiiGhostIn 1.2s ease-out forwards; }
-    .kp-ghost-eye{ animation:none; opacity:1; }
     .kaii-purified .fb-seal{ animation:none; }
     .feedback-overlay.kaii-cursed.show .feedback-sheet{ animation:none; }
     .kaii-cursed.show .fb-drips span{ animation:none; height:var(--h); }

@@ -8,7 +8,7 @@
     display:flex; align-items:center; justify-content:center;
   }
   .progress-wrap{ width:100%; }
-  .progress-label{ font-size:12px; color:var(--bone-dim); margin-bottom:6px; letter-spacing:.05em; text-align:center; }
+  .progress-label{ font-size:12.5px; color:var(--bone-dim); margin-bottom:6px; letter-spacing:.05em; text-align:center; }
   .progress-track{
     height:5px; border-radius:3px; background:var(--line); overflow:hidden;
   }
@@ -45,7 +45,7 @@
     word-break:keep-all;
   }
   .kanji-index{
-    margin-top:10px; font-size:11.5px; color:var(--bone-dim); letter-spacing:.1em;
+    margin-top:10px; font-size:16px; color:var(--bone-dim); letter-spacing:.1em;
   }
 
   .answer-zone{ display:flex; flex-direction:column; gap:10px; }

@@ -88,7 +88,10 @@
 
   .screen{ display:none; flex-direction:column; flex:1; animation:fadeIn .5s ease; }
   .screen.active{ display:flex; }
-  @keyframes fadeIn{ from{opacity:0; margin-top:6px;} to{opacity:1; margin-top:0;} }
+  /* その場でふわっと現れる（透明度だけを変える）。
+     位置をずらすと、margin では高さが一瞬増えてスクロールバーが出て、transform では
+     「タイトルへ戻る」リンクの位置の基準が変わって跳ねてしまうため、動きは付けない */
+  @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
 
   /* ---------- 共通アイコンボタン（音声・ホーム等） ---------- */
   .icon-btn{

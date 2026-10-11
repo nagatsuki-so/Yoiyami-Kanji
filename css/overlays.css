@@ -25,6 +25,8 @@
     overflow-y:auto;
   }
   .feedback-overlay.show .feedback-sheet{ transform:translateY(0); }
+  /* Tabキーの起点にするためにフォーカスを当てているだけなので、枠線は出さない */
+  .feedback-sheet:focus{ outline:none; }
   .fb-result{
     display:flex; align-items:center; gap:10px;
     font-family:'Yuji Syuku',serif;
@@ -37,7 +39,7 @@
   }
   .fb-reading b{ color:var(--bone); font-size:17px; font-weight:700; }
   .fb-trivia-label{
-    font-size:11px; letter-spacing:.1em; color:#9166a8; margin-bottom:6px;
+    font-size:13px; letter-spacing:.1em; color:#9166a8; margin-bottom:6px;
   }
   .fb-trivia{
     font-size:14.5px; line-height:1.75; color:var(--bone);

@@ -1,6 +1,7 @@
 <!-- ▼ フィードバック（解答直後のシート）。怪異乱入時は血の雫・祓の印などが加わる（css/kaii.css） -->
 <div class="feedback-overlay" id="feedback-overlay">
-  <div class="feedback-sheet">
+  <!-- tabindex="-1"：表示した時にここへフォーカスを当て、Tabキーで「次の漢字へ」に移れるようにする（Tabで順に移動する時はここに止まらない） -->
+  <div class="feedback-sheet" id="feedback-sheet" tabindex="-1">
     <div class="fb-drips" aria-hidden="true">
       <span style="--x:7%;--w:7px;--h:22px;--d:.05s"></span>
       <span style="--x:19%;--w:10px;--h:34px;--d:.2s"></span>

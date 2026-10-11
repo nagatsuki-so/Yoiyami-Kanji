@@ -70,9 +70,12 @@
     text-shadow:0 0 22px rgba(111,191,127,0.45), 0 0 64px rgba(74,124,89,0.3);
   }
   .result-actions{ display:flex; flex-direction:column; gap:16px; width:100%; max-width:280px; margin-top:0px; }
+  /* ボタンの幅（最大280px）に「同じ出題設定で再挑戦」が収まるよう、左右の余白を狭め（44px→20px）、改行させない */
   .result-actions .btn-start,
   .result-actions .btn-secondary{
     color:#cac5cf;
+    padding-left:20px; padding-right:20px;
+    white-space:nowrap;
   }
   .result-actions .btn-secondary{
     font-family:'Yuji Syuku',serif;
