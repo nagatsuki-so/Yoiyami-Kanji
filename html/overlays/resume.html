@@ -1,0 +1,13 @@
+<!-- ▼ 途中再開の確認ダイアログ（js/screens/title.js）
+     ページが読み込み直された時（スマホで画面をロックして戻った時など）、クイズの途中経過が残っていれば表示する。
+     「再開する」を押してもらうことで音声も解禁でき、再開直後の怪異演出でも音が鳴る。見た目は中断確認ダイアログと共通 -->
+<div class="confirm-overlay" id="resume-overlay">
+  <div class="confirm-sheet">
+    <div class="confirm-title">前回の続きがあります</div>
+    <div class="confirm-text" id="resume-text"></div>
+    <div class="confirm-actions">
+      <button class="btn-secondary" id="btn-resume-reset">最初から</button>
+      <button class="btn-start" id="btn-resume">再開する</button>
+    </div>
+  </div>
+</div>

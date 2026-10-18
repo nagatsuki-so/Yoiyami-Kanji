@@ -2,6 +2,7 @@
    結果画面（result.js）
    ============================================================ */
 function showResult(){
+  clearProgress(); // 最後まで解き終えたので、途中経過の保存は不要
   showScreen("result");
   const total = state.order.length;
   el.resultScoreNum.textContent = state.score;

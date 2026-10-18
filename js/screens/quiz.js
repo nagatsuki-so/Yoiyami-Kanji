@@ -29,6 +29,76 @@ function currentQuestion(){
   return state.order[state.current];
 }
 
+/* ---- 途中経過の保存・再開 ----
+   スマホで画面をロックしたり他のアプリに切り替えたりすると、ブラウザがページを閉じて読み込み直すことがある。
+   その時に続きから遊べるよう、途中経過を sessionStorage（同じタブの中だけで残る保存場所）に保存しておく。
+   出題順は問題の漢字で保存する（漢字は全問題で重複しないようにしている） */
+const PROGRESS_KEY = "yoiyami-progress";
+
+// answered：今の問題に解答済みか（解答済みなら、再開時は次の問題から）
+function saveProgress(answered){
+  try{
+    sessionStorage.setItem(PROGRESS_KEY, JSON.stringify({
+      difficulty: state.difficulty,
+      questionCount: state.questionCount,
+      mode: state.mode,
+      kaiiEvent: state.kaiiEvent,
+      order: state.order.map(q => q.kanji),
+      current: state.current,
+      score: state.score,
+      answered,
+    }));
+  }catch(e){} // プライベートブラウズなどで保存できない時は、保存せずに遊べるようにする
+}
+
+function clearProgress(){
+  try{ sessionStorage.removeItem(PROGRESS_KEY); }catch(e){}
+}
+
+// 保存した途中経過を読み出す。無い時・壊れている時は null
+function loadProgress(){
+  try{
+    const p = JSON.parse(sessionStorage.getItem(PROGRESS_KEY));
+    const valid = p && Array.isArray(p.order) && p.order.length > 0
+      && Number.isInteger(p.current) && p.current >= 0 && p.current < p.order.length
+      && Number.isInteger(p.score);
+    return valid ? p : null;
+  }catch(e){
+    return null;
+  }
+}
+
+// 保存した途中経過からクイズを再開する（問題データの読み込み後に呼ぶ）。
+// 未解答だった問題はもう一度出し、解答済みなら次の問題から（最後の問題なら結果画面へ）。
+// 公開後に問題データが変わっていて出題順を復元できない時は false を返す
+function resumeQuiz(p){
+  const byKanji = new Map(QUESTIONS.map(q => [q.kanji, q]));
+  const order = p.order.map(kanji => byKanji.get(kanji));
+  if(order.some(q => !q)) return false;
+
+  state.difficulty = p.difficulty;
+  state.questionCount = p.questionCount;
+  state.mode = p.mode;
+  state.kaiiEvent = !!p.kaiiEvent;
+  state.order = order;
+  state.current = p.current;
+  state.score = p.score;
+  syncModeButtons();
+
+  Kaii.cancel();
+  if(state.kaiiEvent) Kaii.preload();
+  if(p.answered){
+    state.current++;
+    if(state.current >= state.order.length){
+      showResult();
+      return true;
+    }
+  }
+  showScreen("quiz");
+  presentQuestion();
+  return true;
+}
+
 // 怪異演出の制限時間（秒）
 const KAII_TIME_LIMIT = { choice: 7, free: 10 };
 // 最初のこの問題数までは、怪異演出の対象の問題でも怪異を起こさない（確認用URLの時は1問目から起こす）
@@ -43,6 +113,7 @@ function isKaiiQuestion(q){
 // 問題を出す。怪異演出の対象なら、予兆（段階1）を挟んでから表示し、制限時間（段階2）を開始する
 function presentQuestion(){
   const q = currentQuestion();
+  saveProgress(false);
   if(!isKaiiQuestion(q)){
     renderQuestion();
     return;
@@ -189,6 +260,7 @@ function finishAnswer(isRight, timedOut = false){
   const isKaii = Kaii.isPressuring();
   const remainMs = isKaii ? Kaii.stopPressure() : 0;
   if(isRight) state.score++;
+  saveProgress(true);
   el.progressLabel.textContent = `問 ${state.current+1} / ${state.order.length} ・ 正解 ${state.score}`;
   el.progressFill.style.width = `${((state.current+1)/state.order.length)*100}%`;
 
@@ -220,7 +292,7 @@ function finishAnswer(isRight, timedOut = false){
     el.freeInput.blur();
     Kaii.runPunish(() => {
       setFeedbackStyle("cursed");
-      el.fbResult.textContent = timedOut ? "時間切れ――憑かれた" : "憑かれた";
+      el.fbResult.textContent = "憑かれた";
       el.fbKaiiNote.textContent = timedOut ? "制限時間内に祓えなかった" : "不正解 ― 読みを誤り、怪異に魅入られた";
       showFeedback();
     });
@@ -246,6 +318,7 @@ function closeConfirmHome(){
   el.confirmOverlay.classList.remove("show");
 }
 function goHome(){
+  clearProgress();
   Kaii.cancel();
   closeConfirmHome();
   el.feedbackOverlay.classList.remove("show");

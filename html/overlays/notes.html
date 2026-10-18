@@ -1,0 +1,12 @@
+<!-- ▼ ホーム画面：開発者手記（更新履歴）のモーダル（js/screens/notes.js）
+     GitHub のリリースを読み込んで、年ごとに表示する。
+     土台は出題設定画面の説明モーダル（info.html）と共通で、notes-sheet を付けて和紙の御札風にしている（css/overlays.css） -->
+<div class="info-overlay notes-overlay" id="notes-overlay">
+  <div class="info-sheet notes-sheet">
+    <div class="info-title">開発者手記</div>
+    <select class="notes-year" id="notes-year" aria-label="表示する年" hidden></select>
+    <div class="notes-status" id="notes-status" hidden></div>
+    <div id="notes-list"></div>
+    <button class="btn-secondary" id="btn-notes-close">閉じる</button>
+  </div>
+</div>

@@ -16,6 +16,7 @@
     "js/screens/result.js",  // 結果画面
     "js/screens/mode.js",    // 出題設定画面
     "js/screens/title.js",   // タイトル画面・読込エラー画面
+    "js/screens/notes.js",   // ホーム画面の更新履歴（GitHub のリリースを表示）
   ];
 
   // 部品のHTMLを取得する

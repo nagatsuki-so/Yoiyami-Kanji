@@ -100,6 +100,19 @@ setupOptionGroup(formatButtons, (value) => { state.mode = value; });
 
 setupOptionGroup(kaiiButtons, (value) => { state.kaiiEvent = (value === "on"); });
 
+// 4つの選択グループの「選択中」の表示を、今の state に合わせる。
+// 途中再開で設定だけを復元した時に、出題設定画面の表示と実際の設定がずれないようにする
+function syncModeButtons(){
+  const mark = (buttons, value) => buttons.forEach(b => b.classList.toggle("selected", b.dataset.value === String(value)));
+  mark(difficultyButtons, state.difficulty);
+  mark(countButtons, state.questionCount);
+  mark(formatButtons, state.mode);
+  mark(kaiiButtons, state.kaiiEvent ? "on" : "off");
+  difficultyButtons.forEach(b => { b.disabled = state.questionCount === "all"; });
+  updateCountAllDiffSub();
+  updateKaiiRateSub();
+}
+
 document.getElementById("btn-mode-start").addEventListener("click", () => {
   SoundEngine.playTapSfx();
   startQuiz();

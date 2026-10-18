@@ -73,7 +73,8 @@
 
   .free-input-row{ display:flex; gap:8px; }
   .free-input{
-    flex:1; min-height:52px;
+    /* min-width:0：入力欄の「最低限の幅」より縮められるようにし、スマホの狭い画面でも判定ボタンを押し出さない */
+    flex:1; min-width:0; min-height:52px;
     background:var(--bg-panel);
     border:1px solid var(--line);
     border-radius:6px;

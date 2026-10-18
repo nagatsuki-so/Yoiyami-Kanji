@@ -51,3 +51,28 @@
   #screen-title .seal-divider{ margin:20px auto; }     /* タイトルと概要文の間 +10px×2 */
   #screen-title .btn-start{ margin-top:20px; }         /* ボタン1個分（56px）下げる */
   .title-hint{ font-size:12px; color:var(--bone-dim); opacity:.7; }
+
+  /* 左上の「開発者手記」：白い和紙の小さな御札。左に朱色の丸い印「記」。
+     怪異を祓い清めた時の結果シート（css/kaii.css）と同じ和紙・墨・朱の色を使う。
+     他の画面の「タイトルへ戻る」と同じく左上に絶対配置し、中央の「魑」などの位置に影響させない */
+  .notes-ofuda{
+    position:absolute; top:10px; left:12px; z-index:5;
+    display:flex; align-items:center; gap:7px;
+    padding:6px 12px 6px 7px;
+    background:linear-gradient(180deg, #f6efe0, #e6dbc3 70%, #d8caac);
+    border:1px solid rgba(90,60,30,.35);
+    border-radius:2px;
+    box-shadow:0 2px 10px rgba(0,0,0,.45), 0 0 14px rgba(255,240,200,.08);
+    color:var(--kaii-ink);
+    font-family:'Yuji Syuku',serif; font-size:13px; letter-spacing:.1em; line-height:1;
+    cursor:pointer;
+    transition:transform .12s ease;
+  }
+  .notes-ofuda:active{ transform:scale(0.96); }
+  .notes-ofuda-seal{
+    display:flex; align-items:center; justify-content:center;
+    width:20px; height:20px; flex-shrink:0;
+    border:1.5px solid var(--kaii-shu); border-radius:50%;
+    color:var(--kaii-shu);
+    font-size:11px; letter-spacing:0;
+  }
