@@ -69,6 +69,35 @@
     color:var(--sick-green-bright);
     text-shadow:0 0 22px rgba(111,191,127,0.45), 0 0 64px rgba(74,124,89,0.3);
   }
+  /* 結果のシェア：小さなボタンを横並びにする。色は下で、それぞれのサービスの色に少しだけ寄せる */
+  .result-share{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:10px;
+    width:100%; max-width:320px;
+    margin:4px auto 22px;
+  }
+  .share-btn{
+    min-height:40px; padding:8px 16px;
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:100px;
+    color:var(--bone-dim);
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:13px; letter-spacing:.05em;
+    white-space:nowrap;
+    cursor:pointer;
+    transition:border-color .15s ease, color .15s ease, transform .1s ease;
+  }
+  .share-btn:active{ transform:scale(0.96); }
+  /* サービスごとの色：アプリの暗い雰囲気から浮かないよう、ベタ塗りにはせず、背景をうっすら色付けして枠と文字で色を感じさせる。
+     PCでマウスを乗せた時は、それぞれの色が少し濃くなる */
+  .share-x{ background:#0b0b0c; border-color:#3a3a3e; color:#e7e9ea; }
+  .share-x:hover{ background:#000; border-color:#5a5a60; }
+  .share-line{ background:rgba(6,199,85,.12); border-color:rgba(6,199,85,.5); color:#6fe0a0; }
+  .share-line:hover{ background:rgba(6,199,85,.2); border-color:rgba(6,199,85,.75); }
+  .share-more{ background:rgba(170,170,180,.1); border-color:rgba(170,170,180,.38); color:#c4c4cc; }
+  .share-more:hover{ background:rgba(170,170,180,.18); border-color:rgba(170,170,180,.6); }
+  /* 「その他」は使えない端末では hidden で隠す（今後 display を指定しても隠れるよう、明示しておく） */
+  .share-btn[hidden]{ display:none; }
+
   .result-actions{ display:flex; flex-direction:column; gap:16px; width:100%; max-width:280px; margin-top:0px; }
   /* ボタンの幅（最大280px）に「同じ出題設定で再挑戦」が収まるよう、左右の余白を狭め（44px→20px）、改行させない */
   .result-actions .btn-start,
