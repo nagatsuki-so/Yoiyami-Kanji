@@ -1,0 +1,83 @@
+  /* ============================================================
+     プライバシーポリシー・お問い合わせページ用スタイル
+     色の変数は base.css のものを使うため、base.css の後に読み込む
+     ============================================================ */
+  .legal{
+    max-width:720px;
+    margin:0 auto;
+    padding:48px 20px 40px;
+    line-height:1.9;
+    font-size:15px;
+  }
+
+  .legal h1{
+    font-family:'Yuji Syuku',serif;
+    font-weight:normal;
+    font-size:28px;
+    letter-spacing:.08em;
+    text-align:center;
+    margin:0 0 8px;
+    text-shadow:0 0 18px rgba(201,42,61,0.5);
+  }
+  .legal .site-name{
+    text-align:center;
+    font-size:13px;
+    color:var(--bone-dim);
+    margin:0 0 40px;
+  }
+
+  .legal h2{
+    font-family:'Yuji Syuku',serif;
+    font-weight:normal;
+    font-size:19px;
+    margin:36px 0 10px;
+    padding-bottom:6px;
+    border-bottom:1px solid var(--line);
+  }
+  .legal h3{
+    font-size:15px;
+    font-weight:700;
+    color:var(--bone-dim);
+    margin:20px 0 6px;
+  }
+
+  .legal p, .legal ul{ margin:0 0 12px; }
+  .legal ul{ padding-left:1.4em; }
+
+  .legal a{ color:var(--blood-bright); }
+  .legal a:hover{ color:var(--bone); }
+
+  /* 運営者情報の表 */
+  .legal dl{
+    display:grid;
+    grid-template-columns:8em 1fr;
+    gap:8px 16px;
+    margin:0 0 12px;
+  }
+  .legal dt{ color:var(--bone-dim); }
+  .legal dd{ margin:0; }
+
+  .legal .date{
+    margin-top:36px;
+    text-align:right;
+    font-size:13px;
+    color:var(--bone-dim);
+  }
+
+  .legal .back{
+    display:block;
+    margin-top:40px;
+    text-align:center;
+  }
+
+  /* base.css の PC 表示用の中央寄せを解除する（長いページの上が切れるため） */
+  @media (min-width:720px){
+    html,body{ display:block; height:auto; }
+  }
+
+  @media (max-width:480px){
+    .legal{ padding-top:32px; font-size:14px; }
+    .legal h1{ font-size:24px; }
+    .legal dl{ grid-template-columns:1fr; gap:2px; }
+    .legal dd{ margin-bottom:8px; }
+  }

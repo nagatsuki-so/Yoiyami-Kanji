@@ -13,7 +13,11 @@
   - GitHubのリポジトリ名と公開URLは、当初は既存のリンクが切れないよう旧名(`dark-kanji-kentei`)のままにしていたが、その後`Yoiyami-Kanji`に変更した。旧URLは新URLへ転送されない。
 - **構成**: ビルド不要の静的サイト。HTML・CSS・JSは画面ごと、問題データは難易度ごとにファイルを分けている(2026-09-29に分割)。
   ```
-  index.html              … 土台だけ(<head>、背景、BGMボタン、各部品の差し込み口)
+  index.html              … 土台だけ(<head>、背景、BGMボタン、各部品の差し込み口、フッター)
+  privacy.html            … プライバシーポリシー(ゲームとは独立したページ。1.11参照)
+  contact.html            … 運営者情報・お問い合わせ(同上)
+  manifest.webmanifest    … ホーム画面に追加した時の名前・アイコン
+  CNAME                   … 独自ドメインの設定(GitHub Pages用)
   html/
     screens/  title.html / error.html / mode.html / quiz.html / result.html
     overlays/ feedback.html / confirm.html / resume.html / info.html / notes.html   … 結果シート・中断確認・途中再開の確認・説明モーダル・開発者手記
@@ -23,6 +27,7 @@
     title.css / mode.css / quiz.css / result.css
     overlays.css          … 結果シート・中断確認・説明モーダル・開発者手記
     kaii.css              … 怪異演出一式(怪異用の結果シートも含む。他を上書きするため最後に読み込む)
+    legal.css             … privacy.html・contact.html用(base.cssの後に読み込む)
   js/
     boot.js               … HTML部品を読み込んで差し込み、そのあと下のJSを順番に読み込む
     data.js               … 問題データの読み込み・正誤判定(ゆらぎ吸収)
@@ -37,8 +42,9 @@
   - **JSの読み込み順**:各JSは読み込まれた瞬間に画面の要素を探す作りのため、部品を差し込んだ後に`boot.js`の`SCRIPTS`の順番で読み込む。後のファイルは前のファイルで定義したもの(`SoundEngine`・`state`・`el`・`Kaii`など)を使う。
   - **CSS内の素材の参照**:`css/`フォルダ内のCSSから素材を参照する時は`../assets/`から始める(HTMLやJSからは`assets/`から始める)。
   - `assets/kaii/`:加工済みの実写素材・AI生成素材(動画4本・画像4枚)。詳細は1.10「使用している素材」。
+  - `assets/icons/`:ファビコン・ホーム画面アイコン(4枚)、`assets/ogp.png`:リンク共有時のプレビュー画像。詳細は1.11。
   - `_materials/`:加工前の元素材と確認用の静止画。`.gitignore`で除外しており、公開されない。
-- **公開先**: GitHub Pages(`https://nagatsuki-so.github.io/Yoiyami-Kanji/`)
+- **公開先**: `https://yoiyami-kanji.com/`(独自ドメイン。GitHub Pagesで公開し、`CNAME`ファイルで設定している)
 - **リポジトリ**: `nagatsuki-so/Yoiyami-Kanji`(GitHub)。リポジトリ名を変えた時は、`js/screens/notes.js`の`RELEASES_URL`も直すこと
 - **開発状況**: `main`ブランチが本番相当。新機能は`feature`系ブランチで開発しmainにマージする運用。
 
@@ -298,6 +304,31 @@
 
 URLに`?kaii=eye`/`face`/`onmyoji`/`all`を付けると、怪異乱入「あり」の時に**全問題で怪異演出が発生**し、罰演出の種類も指定したものに固定される(`all`は通常どおりランダム)。本番のURLにはパラメータが付かないため、通常のプレイには影響しない。
 
+### 1.11 サイト情報・共有まわり(2026-11-07追加)
+
+収益化の準備(2.5)として追加したもの。
+
+#### サイト情報ページ
+- `privacy.html`(プライバシーポリシー):アクセス解析、広告(今後AdSenseを使う場合に備えた記載)、電気通信事業法に基づく外部送信の公表(Google アナリティクス・Google Fonts)、ブラウザへの保存(途中再開のsessionStorage)、お問い合わせで取得する情報、免責事項。制定日は2026-11-07。利用規約は作らず、免責事項をここに含めた
+- `contact.html`(運営者情報・お問い合わせ):運営者はNAGATSUKI。お問い合わせはGoogleフォーム(`https://forms.gle/h8VcTGYuDnw2Cc6c6`)で受け付け、本文中のリンクから開く
+- 2ページともゲームとは独立した普通のページで、見た目は`css/legal.css`。PC表示では、base.cssのウィンドウ中央寄せを解除している(長いページの上が切れるため)
+- ゲームのフッターに「プライバシーポリシー/お問い合わせ」のリンクを置いた。以前の「MADE BY NAGATSUKI」は削除した
+
+#### アクセス解析
+- Google アナリティクス(測定ID:`G-P592WETBHK`)を、`index.html`・`privacy.html`・`contact.html`の3ページに組み込んでいる
+- ゲームは1ページの中で画面を切り替える作りのため、計測されるのは「サイトを開いた」ことだけ。画面の移動やプレイ数を記録したい場合は、別途イベント計測を追加する
+- Cookieの同意バナーは付けていない(日本向けのサイトとして、プライバシーポリシーでの公表で対応)
+
+#### 共有時のプレビュー・アイコン
+- OGP:`index.html`に設定。画像は`assets/ogp.png`(2160×1215・約4MB)
+- ファビコン・ホーム画面アイコン:`assets/icons/`の4枚(32px・180px(iPhone用)・192px・512px)。Android用に`manifest.webmanifest`も置いている
+
+#### 使用している素材
+| ファイル | 元素材 | ライセンス |
+|---|---|---|
+| `assets/ogp.png` | Runwayで生成した画像に、文字(「宵闇漢字解奇譚」「闇に潜む漢字を読み解け」、Yuji Syuku)を入れてトリミングしたもの。元画像と作成用のHTMLは`_materials/紹介画像_作業用/` | Runway利用規約(1.10の動画と同じ) |
+| `assets/icons/` | Yuji Syukuフォントの「魑」を、ffmpegで黒地に赤く描いたもの(2026-10-25作成) | SIL Open Font License(商用利用可・クレジット表記不要) |
+
 ---
 
 ## 2. 追加要件
@@ -412,20 +443,17 @@ URLに`?kaii=eye`/`face`/`onmyoji`/`all`を付けると、怪異乱入「あり�
 - 独自ドメイン(`yoiyami-kanji.com`)
 - リンク共有時のプレビュー(OGP)(2026-11-03)。画像は`assets/ogp.png`(2160×1215・約4MB)。軽くするための縮小は保留中
 - ファビコン・ホーム画面アイコン(2026-11-03)。`assets/icons/`と`manifest.webmanifest`
+- プライバシーポリシー、運営者情報・お問い合わせ(2026-11-07)。利用規約は作らず、免責事項をプライバシーポリシーに含めた(1.11参照)
+- アクセス解析(Google アナリティクス)の導入(2026-11-07。1.11参照)
+- 素材の商用利用の確認(2026-11-08)。怪異演出の動画は1.10、紹介画像・アイコンは1.11を参照。フォントはGoogle Fonts(SIL Open Font License)、効果音・BGMは素材ファイルを使わずブラウザ上で合成している
 
 #### 未対応
-- **審査・法律まわり**(AdSenseの審査で特に見られる)
-  - プライバシーポリシーのページ(広告のCookie利用やアクセス解析について書く。AdSenseでは事実上必須)
-  - 運営者情報・お問い合わせ先(問い合わせフォームか連絡用メールアドレスなど)
-  - 利用規約・免責事項(あると審査で有利)
 - **集客・計測**
-  - アクセス解析の導入(Google Analyticsなど)。3.の「利用状況の可視化」にもつながる
   - Google Search Consoleへの登録と、`robots.txt`・`sitemap.xml`の用意
 - **広告の導入**
   - AdSenseへの申請と、審査に通った後の`ads.txt`の設置
   - 広告の置き場所の設計(怪異演出やクイズの邪魔にならない位置。結果画面などが候補)
 - **中身の準備**
-  - 素材の商用利用の確認(2.3・2.4.2のフリー素材・Runwayで生成した動画)
   - 独自のコンテンツの量(AdSenseは中身の薄いサイトを落とすため、問題数の充実や、遊び方・漢字の解説ページなどがあると有利)
 
 ---
