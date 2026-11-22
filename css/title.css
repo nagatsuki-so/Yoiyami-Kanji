@@ -50,7 +50,24 @@
   #screen-title .title-block{ margin-top:20px; }      /* 「魑」とタイトルの間 +20px */
   #screen-title .seal-divider{ margin:20px auto; }     /* タイトルと概要文の間 +10px×2 */
   #screen-title .btn-start{ margin-top:20px; }         /* ボタン1個分（56px）下げる */
-  .title-hint{ font-size:12px; color:var(--bone-dim); opacity:.7; }
+  /* 「封を解く」の下の「遊び方はこちら」（howto.html へ移動）。白と黒の間をゆっくり明滅させる。
+     ボタンとの間は、画面の gap（28px）を 14px に詰める */
+  .title-howto{
+    margin-top:-14px;
+    font-size:12px; letter-spacing:.08em;
+    color:var(--bone);
+    text-decoration:underline; text-underline-offset:3px;
+    animation:howtoBlink 2.6s ease-in-out infinite;
+  }
+  @keyframes howtoBlink{
+    0%, 100% { color:var(--bone); }
+    50% { color:#2a2428; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .title-howto{ animation:none; }
+  }
+  /* ボタン押下後に「問題を召喚中…」を出す欄。普段は空なので、リンクとの間を詰めて余白を取りすぎないようにする */
+  .title-hint{ font-size:12px; color:var(--bone-dim); opacity:.7; margin:-14px 0 0; }
 
   /* 左上の「開発者手記」：白い和紙の小さな御札。左に朱色の丸い印「記」。
      怪異を祓い清めた時の結果シート（css/kaii.css）と同じ和紙・墨・朱の色を使う。
