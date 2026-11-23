@@ -1,8 +1,10 @@
 <!-- ▼ タイトル画面 -->
 <section id="screen-title" class="screen active">
-  <!-- 開発者手記（更新履歴）のモーダルを開く（js/screens/notes.js）。和紙の御札風（css/title.css）。
+  <!-- 開発者手記（更新履歴）のモーダルを開く（js/screens/notes.js）。赤い筆文字の下線リンク風（css/title.css）。
        他の画面の「タイトルへ戻る」と同じく左上に置き、中央のレイアウトに影響させない -->
-  <button class="notes-ofuda" id="btn-release-notes"><span class="notes-ofuda-seal" aria-hidden="true">書</span>開発者手記</button>
+  <button class="notes-ofuda" id="btn-release-notes">開発者手記</button>
+  <!-- 宵闇コラム（column/）へのリンク。開発者手記の下に置く（css/title.css） -->
+  <a class="title-column" href="column/">宵闇コラム</a>
   <div class="glyph-guard">魑</div>
   <div class="title-block">
     <!-- 「解」が不規則に一瞬だけ「怪」に入れ替わる（js/screens/title.js）。読み上げは常に正式名称にする -->
